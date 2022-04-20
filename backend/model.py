@@ -5,6 +5,7 @@ class Categoria(BaseModel):
     id: int
     title: str
     desc: str
+    produtos: List[int]
 
 class Produto(BaseModel):
     id: int

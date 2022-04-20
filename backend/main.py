@@ -1,6 +1,7 @@
 from model import Categoria, Produto
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from typing import List
 
 # App Object
 app = FastAPI()
@@ -57,8 +58,8 @@ async def post_categoria(categoria:Categoria):
     raise HTTPException(400, f"Something went wrong / Bad Request")
 
 @app.put("/api/categoria{id}/", response_model = Categoria)
-async def put_categoria(id:int, title:str, desc:str):
-    response = await update_categoria(id, title, desc)
+async def put_categoria(id:int, title:str, desc:str, produtos:List[int]):
+    response = await update_categoria(id, title, desc, produtos)
     if response:
         return response
     raise HTTPException(404, f"There is no Categoria item with this ID {id}")
@@ -78,7 +79,7 @@ async def get_produto():
     return response
 
 @app.get("/api/produto{id}", response_model = Produto)
-async def get_produto_by_id(id:int):# Se não especificar o tipo do ID (int), a aplicação não localiza o registro.
+async def get_produto_by_id(id:int): # Se não especificar o tipo do ID (int), a aplicação não localiza o registro.
     response = await fetch_one_produto(id)
     if response:
         return response
@@ -104,3 +105,12 @@ async def delete_produto(id:int):
     if response:
         return "Successfully deleted Produto item!"
     raise HTTPException(404, f"There is no Produto item with this ID {id}")
+
+# Testes
+@app.get("/api/produto{id}/mostrar_preco")
+async def mostrar_preco_produto(id:int): # Se não especificar o tipo do ID (int), a aplicação não localiza o registro.
+    document = await fetch_one_produto(id)
+    if document:
+        return {"produto_id" : document["id"], "preco_produto" : document["price"]}
+    raise HTTPException(404, f"There is no Produto item with this ID {id}")
+
