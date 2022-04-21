@@ -72,11 +72,34 @@ async def update_produto(id, title, desc, price, qty):
     document = await collectionProdutos.find_one({"id" : id})
     return document
 
-async def remove_produto(id):
-    if await collectionProdutos.find_one({"id" : id}): # Temos o produto para deletar
-        await collectionProdutos.delete_one({"id" : id})
-        return True
+async def remove_produto(id_produto):
+    produto_deletado = await collectionProdutos.find_one({"id" : id_produto})
+
+    if produto_deletado: # Temos o produto para deletar
+        if produto_deletado["categorias"]: # Produto está associado a categorias
+            # print(produto_deletado["categorias"])
+            for id_categoria in produto_deletado["categorias"]:
+                # print(id_categoria)
+                categoria = await fetch_one_categoria(id_categoria) # Puxamos do banco a categoria vinculada
+                print(categoria["id"], categoria["produtos"])
+                categoria["produtos"].remove(str(id_produto)) # Apaga ID do produto na lista da categoria
+                # print('Após remoção: ', categoria["produtos"])
+                # print()
+                await update_produtos_categoria(id_categoria, categoria["produtos"]) # Atualiza categoria no banco
+                print('Após remoção: ', categoria["produtos"])
+            await collectionProdutos.delete_one({"id" : id_produto})
+            return True
+        else:
+            print("PRODUTO NÃO POSSUI CATEGORIAS")
     return False
 
 # Testes
 
+# Vincular Categorias e Produtos
+async def update_produtos_categoria(id_cat, id_produtos):
+    await collectionCategorias.update_one({"id" : id_cat}, {"$set" : {"produtos" : id_produtos}})
+
+    # Insira aqui o código que vincula a categoria em cada um dos produtos
+
+    document = await collectionCategorias.find_one({"id": id_cat})
+    return document

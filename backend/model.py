@@ -2,14 +2,15 @@ from pydantic import BaseModel
 from typing import List
 
 class Categoria(BaseModel):
-    id: int
+    id: str
     title: str
     desc: str
-    produtos: List[int]
+    produtos: List[str]
 
 class Produto(BaseModel):
-    id: int
+    id: str
     title: str
     desc: str
     price: float
     qty: int
+    categorias: List[str]
