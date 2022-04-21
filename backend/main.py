@@ -2,19 +2,7 @@ from model import Categoria, Produto
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
-from database import(
-    fetch_one_categoria,
-    fetch_all_categorias,
-    create_categoria,
-    update_categoria,
-    remove_categoria,
-    fetch_one_produto,
-    fetch_all_produtos,
-    create_produto,
-    update_produto,
-    remove_produto,
-    update_produtos_categoria
-)
+from database import *
 
 
 # App Object
@@ -104,8 +92,15 @@ async def mostrar_preco_do_produto(id:str): # Se não especificar o tipo do ID (
 # Vincular Categorias e Produtos
 @app.put("/api/categoria{id}/vincula_produtos", response_model = Categoria)
 async def vincular_produtos_categoria(id_cat:str, id_produtos:List[str]):
-    response = await update_produtos_categoria(id_cat, id_produtos)
+    response = await vincula_produtos_categoria(id_cat, id_produtos)
     if response:
         return response
     raise HTTPException(404, f"Error: The products could not be linked.")
+
+@app.put("/api/categoria{id}/desvincula_produtos", response_model = Categoria)
+async def desvincular_produtos_categoria(id_cat:str, id_produtos:List[str]):
+    response = await desvincula_produtos_categoria(id_cat, id_produtos)
+    if response:
+        return response
+    raise HTTPException(404, f"Error: The products could not be unlinked.")
 

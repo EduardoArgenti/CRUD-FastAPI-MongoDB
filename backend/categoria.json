@@ -1,0 +1,17 @@
+[{
+  "_id": {
+    "$oid": "62618ae9e867533fa6d2573b"
+  },
+  "id": "CAT0",
+  "title": "Bota",
+  "desc": "Coleção de botas de inverno",
+  "produtos": []
+},{
+  "_id": {
+    "$oid": "62618e3bd0630bef550c96e1"
+  },
+  "id": "CAT1",
+  "title": "Chapéu",
+  "desc": "Coleção de chapéus de verão",
+  "produtos": []
+}]

@@ -1,0 +1,31 @@
+[{
+  "_id": {
+    "$oid": "62618a51e867533fa6d25738"
+  },
+  "id": "PROD0",
+  "title": "Bota Cano Curto Preta",
+  "desc": "Lançamento Outono 2022",
+  "price": 249.99,
+  "qty": 15,
+  "categorias": []
+},{
+  "_id": {
+    "$oid": "626194105a446cdae09cde1c"
+  },
+  "id": "PROD1",
+  "title": "Bota Cano Longo Marrom",
+  "desc": "Moda feminina",
+  "price": 279.99,
+  "qty": 10,
+  "categorias": []
+},{
+  "_id": {
+    "$oid": "626194335a446cdae09cde1d"
+  },
+  "id": "PROD2",
+  "title": "Chapéu de tecido Azul",
+  "desc": "Coleção de Verão França",
+  "price": 99.99,
+  "qty": 5,
+  "categorias": []
+}]
