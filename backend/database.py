@@ -69,7 +69,7 @@ async def update_produto(id, title, desc, price, qty):
     }
 
     await collectionProdutos.update_one({"id" : id}, {"$set" : update})
-    document = await collection.find_one({"id" : id})
+    document = await collectionProdutos.find_one({"id" : id})
     return document
 
 async def remove_produto(id):
