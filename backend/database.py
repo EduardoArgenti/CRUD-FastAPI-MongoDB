@@ -21,6 +21,7 @@ async def fetch_all_categorias():
 
 async def create_categoria(categoria):
     document = categoria
+    
     if await fetch_one_categoria(document["id"]): # Checa se categoria já existe no banco
         return False
     else:
@@ -28,12 +29,11 @@ async def create_categoria(categoria):
         result = await collectionCategorias.insert_one(document)
         return document
 
-async def update_categoria(id, title, desc, produtos):
+async def update_categoria(id, title, desc):
     # Preparação da definição do update (necessário ao atualizar mais de 1 atributo)
     update = {
         'title' : title,
-        'desc' : desc,
-        'produtos' : produtos
+        'desc' : desc
     }
 
     await collectionCategorias.update_one({"id" : id}, {"$set" : update})
@@ -130,55 +130,83 @@ async def vincula_produtos_categoria(id_cat, id_produtos):
 
     # Vincula os produtos numa categoria
     categoria = await fetch_one_categoria(id_cat)
-    categoria["produtos"] = categoria["produtos"] + id_produtos # Concatena a lista antiga com os novos produtos
 
-    categoria["produtos"] = list(dict.fromkeys(categoria["produtos"])) # Remove produtos duplicados, se houver
+    if categoria: # Verifica se categoria existe
+        # Verifica se os produtos existem
+        for produto in id_produtos:
+            teste = await fetch_one_produto(produto)
+            if teste:
+                continue
+            else:
+                return False
+            
 
-    updateCat = {
-        'produtos' : categoria["produtos"]
-    }
+        categoria["produtos"] = categoria["produtos"] + id_produtos # Concatena a lista antiga com os novos produtos
 
-    await collectionCategorias.update_one({"id" : id_cat}, {"$set" : updateCat}) # Atualiza nova lista de produtos no banco
+        categoria["produtos"] = list(dict.fromkeys(categoria["produtos"])) # Remove produtos duplicados, se houver
 
-    # Vincula a categoria nos produtos
-    for id_produto in id_produtos:
-        produto = await fetch_one_produto(id_produto)
-        produto["categorias"].append(id_cat)
-
-        produto["categorias"] = list(dict.fromkeys(produto["categorias"])) # Remove categorias duplicadas, se houver
-
-        updateProd = {
-            'categorias' : produto["categorias"]
+        updateCat = {
+            'produtos' : categoria["produtos"]
         }
 
-        await collectionProdutos.update_one({"id" : id_produto}, {"$set" : updateProd})
-    
-    document = await collectionCategorias.find_one({"id": id_cat})
-    return document
+        await collectionCategorias.update_one({"id" : id_cat}, {"$set" : updateCat}) # Atualiza nova lista de produtos no banco
+
+        # Vincula a categoria nos produtos
+        for id_produto in id_produtos:
+            produto = await fetch_one_produto(id_produto)
+            produto["categorias"].append(id_cat)
+
+            produto["categorias"] = list(dict.fromkeys(produto["categorias"])) # Remove categorias duplicadas, se houver
+
+            updateProd = {
+                'categorias' : produto["categorias"]
+            }
+
+            await collectionProdutos.update_one({"id" : id_produto}, {"$set" : updateProd})
+        
+        document = await collectionCategorias.find_one({"id": id_cat})
+        return document
+    else:
+        return False
 
 async def desvincula_produtos_categoria(id_cat, id_produtos):
 
-    # remove produtos da categoria
     categoria = await fetch_one_categoria(id_cat)
-    for id_produto in id_produtos:
-        categoria["produtos"].remove(id_produto)
+    
+    if categoria: # Verifica se categoria existe
+        # Verifica se os produtos existem
+        for produto in id_produtos:
+            teste = await fetch_one_produto(produto)
+            if teste:
+                continue
+            else:
+                return False
+    
+        # remove produtos da categoria 
+        for id_produto in id_produtos:
+            if id_produto in categoria["produtos"]:
+                categoria["produtos"].remove(id_produto)
 
-    updateCat = {
-        'produtos' : categoria["produtos"]
-    }
-
-    await collectionCategorias.update_one({"id" : id_cat}, {"$set" : updateCat})
-
-    # remove categoria dos produtos
-    for id_produto in id_produtos:
-        produto = await fetch_one_produto(id_produto)
-        produto["categorias"].remove(id_cat)
-
-        updateProd = {
-            'categorias' : produto["categorias"]
+        updateCat = {
+            'produtos' : categoria["produtos"]
         }
 
-        await collectionProdutos.update_one({"id" : id_produto}, {"$set" : updateProd})
+        await collectionCategorias.update_one({"id" : id_cat}, {"$set" : updateCat})
 
-    document = await collectionCategorias.find_one({"id": id_cat})
-    return document
+        # remove categoria dos produtos
+        for id_produto in id_produtos:
+            produto = await fetch_one_produto(id_produto)
+            if id_cat in produto["categorias"]:
+                produto["categorias"].remove(id_cat)
+
+            updateProd = {
+                'categorias' : produto["categorias"]
+            }
+
+            await collectionProdutos.update_one({"id" : id_produto}, {"$set" : updateProd})
+
+        document = await collectionCategorias.find_one({"id": id_cat})
+        return document
+
+    else:
+        return False
